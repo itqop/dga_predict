@@ -2,7 +2,10 @@ import sys
 import pickle
 import re
 import numpy as np
+from sklearn.calibration import CalibratedClassifierCV
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.linear_model import SGDClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import accuracy_score
@@ -27,7 +30,7 @@ def clean4(text):
     return t
 def load_data():
     data = {'site':[],'tag':[]}
-    for line in open('testQ.txt'):
+    for line in open('datasets/testaa3.txt'):
         row = line.split("#")
         data['site'] += [row[0]]
         data['tag'] += [row[1]]
@@ -48,15 +51,19 @@ def hentai():
 
     D = train_test_split(data)
 
-    text_clf = Pipeline([(('tlidf'),TfidfVectorizer()), ('clf', SGDClassifier(loss = 'hinge')),])
+    text_clf = Pipeline([(('tlidf'),TfidfVectorizer()), ('clf', SGDClassifier(loss = 'modified_huber')),])
+    #text_clf = Pipeline([('vect', CountVectorizer()),('tfidf', TfidfTransformer()),('clf', SGDClassifier(loss='log')),])
 
     text_clf.fit(D['train']['x'], D['train']['y'])
+    #calibrator = CalibratedClassifierCV(text_clf, cv='prefit')
 
-    predicted = text_clf.predict(D['train']['x'])
+    #model = calibrator.fit(D['train']['x'], D['train']['y'])
+    predicted = text_clf.predict(D['test']['x'])
 
-    filename = 'modelV13.sav'
+    filename = 'models/modelV53.sav'
     pickle.dump(text_clf, open(filename, 'wb'))
     print(metrics.classification_report(digits=6, y_true=D['test']['y'], y_pred =predicted))
-    #print(metrics.roc_auc_score(D['test']['y'],text_clf.predict_proba(D['train']['x'])))
+    y_prob = text_clf.predict_proba(D['test']['x'])
+    #print(metrics.roc_auc_score(D['test']['y'],y_prob,multi_class='ovo'))
 if __name__ == '__main__':
     sys.exit(hentai())

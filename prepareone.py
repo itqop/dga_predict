@@ -21,18 +21,24 @@ for line in a:
 f.close()
 f1.close()"""
 
-f = open('all_dga.txt', 'r')
-f1 = open('all_legit.txt', 'r')
-f2 = open('testQ.txt','w')
+f = open('datasets/all_dga.txt', 'r')
+f1 = open('datasets/all_legit.txt', 'r')
+f3 = open('datasets/inall.txt', 'r')
+f2 = open('datasets/testQ.txt','w')
 a = []
 for line in f:
     a.append(line)
 for line in f1:
     a.append(line)
+for line in f3:
+    line = line.replace(" #", "")
+    a.append(line)
 random.shuffle(a)
 op =[]
-t = ""
 for line in a:
+    t = ""
+    if len(line) <2:
+        continue
     op = line.split(" ")
     text = line[0:line.index(".")]
     if (len(text) > 3):
